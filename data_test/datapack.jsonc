@@ -1,0 +1,17 @@
+{
+    "models": [
+        {
+            "namespace": "mechanization",
+            "id": "mystic_chestplate",
+            "file": "item/armor/mystic_chestplate.json", // full path in rp would be assets/mechanization/models/item/mystic_chestplate.json
+            "remove_object_attributes": "none",
+            "types": [
+                "chestplate"
+            ],
+            "predicate_item": {
+                "id": "minecraft:chainmail_chestplate",
+                "cmd": 5
+            }
+        }
+    ]
+}

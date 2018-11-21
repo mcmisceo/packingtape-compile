@@ -1,0 +1,10 @@
+{
+    "overrides" : [
+        {
+            "predicate" : {
+                "custommodeldata" : "5"
+            },
+            "model" : "mechanization:items/armor"
+        }
+    ]
+}
