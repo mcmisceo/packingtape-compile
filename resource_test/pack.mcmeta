@@ -1,4 +1,6 @@
 {
-    "pack_format" : 2,
-    "description" : "Mechanization Resources"
+    "pack": {
+        "pack_format": 4,
+        "description": "Mechanization Resources"
+    }
 }

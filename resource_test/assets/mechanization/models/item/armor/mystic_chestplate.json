@@ -1,6 +1,6 @@
 {
-  "parent" : "builtin/generated",
+  "parent": "item/generated",
   "textures": {
-    "layer0": "items/armor/mystic_chestplate"
+    "layer0": "mechanization:item/armor/mystic_chestplate"
   }
 }

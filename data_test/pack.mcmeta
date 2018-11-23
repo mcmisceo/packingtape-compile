@@ -1,4 +1,6 @@
 {
-    "pack_format" : 2,
-    "description" : "Datapack aimed at recreating popular tech mods like IC2 and Thermal Expansion, feature set ranging from an extensive power system to custom ore generation to plasma guns"
+    "pack": {
+        "pack_format": 2,
+        "description": "Datapack aimed at recreating popular tech mods like IC2 and Thermal Expansion, feature set ranging from an extensive power system to custom ore generation to plasma guns"
+    }
 }

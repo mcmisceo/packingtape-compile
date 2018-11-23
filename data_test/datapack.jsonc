@@ -3,7 +3,7 @@
         {
             "namespace": "mechanization",
             "id": "mystic_chestplate",
-            "file": "item/armor/mystic_chestplate.json", // full path in rp would be assets/mechanization/models/item/mystic_chestplate.json
+            "file": "item/armor/mystic_chestplate.json", // full path in rp would be assets/mechanization/models/item/armor/mystic_chestplate.json
             "remove_object_attributes": "none",
             "types": [
                 "chestplate"
