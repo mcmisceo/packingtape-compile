@@ -1,0 +1,20 @@
+{
+    "description" : "Testing datapack, random name",
+    "data-format": 2,
+    "assets-format": 4,
+    "models": [
+        {
+            "namespace": "magilore",
+            "id": "magilore",
+            "file": "item/wands/magic_wand.json", // full path in rp would be assets/mechanization/models/item/wands/magic_wand.json
+            "remove_object_attributes": "none",
+            "types": [
+                "carrot_on_a_stick"
+            ],
+            "predicate_item": {
+                "id": "minecraft:carrot_on_a_stick",
+                "cmd": 59
+            }
+        }
+    ]
+}
