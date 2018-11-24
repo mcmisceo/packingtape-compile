@@ -1,0 +1,31 @@
+{
+  "name": "packingtape",
+  "version": "0.0.1",
+  "description": "Minecraft Datapack/Resourcepack Compatibility Layer",
+  "main": "dist/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcmisceo/packingtape.git"
+  },
+  "keywords": [
+    "minecraft",
+    "compatability-layer",
+    "datapack",
+    "mcfunction",
+    "resourcepack"
+  ],
+  "author": "mcmisceo Team",
+  "license": "CC0-1.0",
+  "bugs": {
+    "url": "https://github.com/mcmisceo/packingtape/issues"
+  },
+  "homepage": "https://github.com/mcmisceo/packingtape#readme",
+  "dependencies": {
+    "parcel": "^1.10.3",
+    "typescript": "^3.1.6"
+  }
+}
