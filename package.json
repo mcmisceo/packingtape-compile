@@ -1,7 +1,7 @@
 {
-  "name": "packingtape",
+  "name": "packingtape-compile",
   "version": "0.0.1",
-  "description": "Minecraft Datapack/Resourcepack Compatibility Layer",
+  "description": "Minecraft Datapack/Resourcepack Compatibility Layer Compiler",
   "main": "dist/index.js",
   "directories": {
     "test": "test"
@@ -9,7 +9,7 @@
   "scripts": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mcmisceo/packingtape.git"
+    "url": "git+https://github.com/mcmisceo/packingtape-compile.git"
   },
   "keywords": [
     "minecraft",
@@ -21,11 +21,14 @@
   "author": "mcmisceo Team",
   "license": "CC0-1.0",
   "bugs": {
-    "url": "https://github.com/mcmisceo/packingtape/issues"
+    "url": "https://github.com/mcmisceo/packingtape-compile/issues"
   },
-  "homepage": "https://github.com/mcmisceo/packingtape#readme",
+  "homepage": "https://github.com/mcmisceo/packingtape-compile#readme",
   "dependencies": {
+    "@types/hjson": "^2.4.0",
+    "hjson": "^3.1.2",
     "parcel": "^1.10.3",
+    "strip-json-comments": "^2.0.1",
     "typescript": "^3.1.6"
   }
 }

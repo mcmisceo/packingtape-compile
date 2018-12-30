@@ -1,0 +1,13 @@
+{
+    "description": "Testing datapack, random name",
+    "data-format": 2,
+    "assets-format": 4,
+    "models": [
+        {
+            "namespace": "magilore",
+            "id": "magic_wand",
+            "file": "item/wands/magic_wand.json", // full path in rp would be assets/magilore/models/item/wands/magic_wand.json
+            "item": "mpm:use_detect"
+        }
+    ]
+}

@@ -1,0 +1,1 @@
+give @s minecraft:repeating_command_block{CustomModelData:133} 1

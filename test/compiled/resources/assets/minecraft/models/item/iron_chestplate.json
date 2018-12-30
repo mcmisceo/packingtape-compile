@@ -1,0 +1,10 @@
+{
+    "overrides": [
+        {
+            "predicate": {
+                "custommodeldata": "1"
+            },
+            "model": "mechanization:item/armor/mystic_chestplate"
+        }
+    ]
+}
