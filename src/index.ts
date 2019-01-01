@@ -9,16 +9,21 @@ import { lootmerge } from "./build/lootmerge/index"
 
 
 export function compile(compile_from: string, compile_to: string, in_dev: boolean) {
-    let packs: Array<pack>;
+    let packs: Array<pack> = [];
     let packID: number = 0;
     fs.readdir(compile_from, (err, packnames) => {
+        if (err) console.log(err);
         if (err) throw "Invalid Path";
         for (let packname of packnames) packs.push(new pack(path.join(compile_from, packname), packID++));
+
+
+        json_clean();
+        mpm()
+        score_ns();
+        tag_ns();
+        lootmerge();
     });
 
-    json_clean();
-    mpm()
-    score_ns();
-    tag_ns();
-    lootmerge();
 }
+
+compile("./test/pre-comp", "../test/output", true);
