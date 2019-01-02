@@ -23,8 +23,8 @@ export function compile(compile_from: string, compile_to: string, in_dev: boolea
         const path_from: string = path.join(compile_from, dp.name);
         const path_to: string = path.join(compile_to, dp.name);
 
-        no_parse(path_from, path_to);
         setup_output.datapack(dp, compile_to);
+        no_parse(path_from, path_to);
         json_clean();
         score_ns();
         tag_ns();

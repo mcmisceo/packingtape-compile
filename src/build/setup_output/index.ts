@@ -11,7 +11,12 @@ export function datapack(dp: pack, output_path: string) {
         }
     }
     dp.output_path = dp_path
-    fs.mkdirSync(dp_path);
+    try {
+        fs.mkdirSync(dp_path);
+    } catch (err) {
+        console.log('another dp path mkdir try');
+        console.log(dp_path);
+    }
     fs.writeFileSync(path.join(dp_path, 'pack.mcmeta'), JSON.stringify(datapack_meta));
 }
 
