@@ -1,3 +1,5 @@
-node_modules
 .vscode
+node_modules
 package-lock.json
+test/compile_to
+dist

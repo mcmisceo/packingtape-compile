@@ -1,3 +1,3 @@
-export function mpm() {
+export function mpm(packs) {
 
 }

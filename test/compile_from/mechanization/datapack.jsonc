@@ -1,7 +1,7 @@
 {
     "description": "Datapack aimed at recreating popular tech mods like IC2 and Thermal Expansion, feature set ranging from an extensive power system to custom ore generation to plasma guns",
-    "data-format": 2,
-    "assets-format": 4,
+    "data_format": 2,
+    "assets_format": 4,
     "models": [
         {
             "namespace": "mechanization",
