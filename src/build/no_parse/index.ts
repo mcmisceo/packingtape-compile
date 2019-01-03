@@ -6,7 +6,7 @@ export function no_parse(copy_root: string, paste_root: string) {
     for (let namespace of namespaces) {
         if (namespace != "minecraft") {
             fs.copySync(path.join(copy_root, 'data', namespace), path.join(paste_root, 'data', namespace), {
-                filter: (src) => {
+                filter: (src: string) => {
                     let dirname = path.dirname(src)
                     let parent_folders: Array<string> = dirname.split(path.sep)
                     return (path.extname(src) != '.mcfunction'
