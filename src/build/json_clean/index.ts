@@ -1,3 +1,3 @@
-export function json_clean() {
+export function json_clean(compile_location) {
 
 }

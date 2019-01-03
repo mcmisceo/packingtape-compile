@@ -1,8 +1,8 @@
 import * as fs from "fs-extra";
 import * as path from 'path';
 import * as hjson from 'hjson';
-import { parsed_datapack } from './parsed_datapack'
-import { mpm_model } from './mpm_model'
+import { parsed_pack } from './parsed_pack'
+import { mpm_model } from './json_schema/mpm_model'
 
 export class pack {
     name: string;
@@ -14,21 +14,27 @@ export class pack {
     asset_format: number;
     models: Array<mpm_model>;
 
-    constructor(dp_path: string, id: number) {
-        this.name = path.basename(dp_path);
-        this.input_path = dp_path;
+    constructor(pack_path: string, id: number) {
+        this.name = path.basename(pack_path);
+        this.input_path = pack_path;
         this.id = id;
         let data: string;
+        const file_name: string = "datapack";
+        let file: string;
+        const extensions: Array<string> = ["json", "jsonc", "hjson"];
         try {
-            data = fs.readFileSync(path.join(dp_path, 'datapack.jsonc'), 'utf8');
+            for (let extension of extensions) {
+                file = file_name + '.' + extension
+                if (fs.existsSync(path.join(pack_path, file))) data = fs.readFileSync(path.join(pack_path, file), 'utf8');
+            }
         } catch (err) {
             console.log(err);
-            throw 'Invalid Datapack (Missing datapack config file)';
+            throw 'Invalid Pack (Missing pack config file at ' + path.join(pack_path, file) + extensions[0] + '|' + extensions[1] + '|' + extensions[2] + ')';
         }
-        const datapack: parsed_datapack = hjson.parse(data);
-        this.description = datapack.description;
-        this.data_format = datapack.data_format;
-        this.asset_format = datapack.assets_format;
-        this.models = datapack.models;
+        const pack: parsed_pack = hjson.parse(data);
+        this.description = pack.description;
+        this.data_format = pack.data_format;
+        this.asset_format = pack.assets_format;
+        this.models = pack.models;
     }
 }

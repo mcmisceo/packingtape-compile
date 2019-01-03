@@ -2,22 +2,16 @@ import * as fs from "fs-extra"
 import * as path from "path"
 import { pack } from '../../classes/pack'
 
-export function datapack(dp: pack, output_path: string) {
-    const dp_path: string = path.join(output_path, dp.name);
+export function datapack(dp: pack) {
     const datapack_meta: object = {
         "pack": {
             "description": dp.description,
             "pack_format": dp.data_format
         }
     }
-    dp.output_path = dp_path
-    try {
-        fs.mkdirSync(dp_path);
-    } catch (err) {
-        console.log('another dp path mkdir try');
-        console.log(dp_path);
-    }
-    fs.writeFileSync(path.join(dp_path, 'pack.mcmeta'), JSON.stringify(datapack_meta));
+    fs.ensureDirSync(dp.output_path);
+
+    fs.writeFileSync(path.join(dp.output_path, 'pack.mcmeta'), JSON.stringify(datapack_meta));
 }
 
 export function resources(output_path: string, assets_format: number) {
@@ -28,6 +22,6 @@ export function resources(output_path: string, assets_format: number) {
             "pack_format": assets_format
         }
     }
-    fs.mkdirSync(resources_path);
+    fs.ensureDirSync(resources_path);
     fs.writeFileSync(path.join(resources_path, 'pack.mcmeta'), JSON.stringify(resources_meta));
 }

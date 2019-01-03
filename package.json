@@ -6,7 +6,9 @@
   "directories": {
     "test": "test"
   },
-  "scripts": {},
+  "scripts": {
+    "dev": "rm -rf test/compile_to/* && npx tsc && node ."
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mcmisceo/packingtape-compile.git"

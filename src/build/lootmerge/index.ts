@@ -1,3 +1,3 @@
-export function lootmerge() {
+export function lootmerge(packs) {
 
 }

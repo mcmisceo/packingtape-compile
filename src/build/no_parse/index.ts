@@ -1,7 +1,9 @@
 import * as fs from "fs-extra"
 import * as path from "path"
+import * as hjson from "hjson"
+import { model } from './../../classes/json_schema/minecraft/model'
 
-export function no_parse(copy_root: string, paste_root: string) {
+export function data(copy_root: string, paste_root: string) {
     const namespaces: Array<string> = fs.readdirSync(path.join(copy_root, 'data'), "utf8");
     for (let namespace of namespaces) {
         if (namespace != "minecraft") {
@@ -23,5 +25,14 @@ export function no_parse(copy_root: string, paste_root: string) {
                 console.error(err);
             }
         }
+    }
+
+}
+
+export function assets(copy_root: string, compile_root: string) {
+    const paste_root = path.join(compile_root, 'resources')
+    const namespaces: Array<string> = fs.readdirSync(path.join(copy_root, 'data'), "utf8");
+    for (let namespace of namespaces) {
+        fs.copySync(path.join(copy_root, 'assets', namespace), path.join(paste_root, 'assets', namespace));
     }
 }
