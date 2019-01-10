@@ -7,7 +7,8 @@ import { model } from './../../classes/json_schema/minecraft/model'
 export function mpm(packs: Array<pack>) {
     let pack_ids: object = {};
     for (let pack of packs) {
-        const pack_id = { [pack.id]: pack.name };
+        const packid: string = pack.id.toString();
+        const pack_id = { [packid]: pack.name };
         pack_ids = { ...pack_ids, ...pack_id }
     }
 
