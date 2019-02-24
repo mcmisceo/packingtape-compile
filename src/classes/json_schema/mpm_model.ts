@@ -3,10 +3,10 @@ export class mpm_model {
     id: string;
     file: string;
     item: string;
-    update: update;
+    old: old = undefined;
 }
 
-class update {
+class old {
     id: string;
     cmd: number;
 }

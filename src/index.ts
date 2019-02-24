@@ -11,31 +11,39 @@ import { score_ns } from "./build/score_ns/index"
 import { tag_ns } from "./build/tag_ns/index"
 import { lootmerge } from "./build/lootmerge/index"
 import { manifest } from "./classes/json_schema/manifest"
+import { old_pack } from "./classes/old_pack";
 
 
 export function compile(compile_from: string, compile_to: string, manifest_path: string = undefined, in_dev: boolean = null) {
     let check_manifest: boolean = false;
-    if (typeof manifest_path !== undefined) check_manifest = true;
-    if (typeof in_dev === undefined) in_dev = false;
+    if (manifest_path) check_manifest = true;
+    if (!in_dev) in_dev = false;
     let packs: Array<pack> = [];
     let last_packID: number = 0;
     const packnames: Array<string> = fs.readdirSync(compile_from, "utf8");
     let assets_formats: Array<number> = [];
     let manifest: manifest = undefined;
-    let new_manifest: manifest = manifest;
 
-    if (check_manifest) if (fs.existsSync(manifest_path)) manifest = hjson.parse(manifest_path);
-    last_packID = last_packID + manifest.lastID + 1;
+    if (check_manifest) if (fs.existsSync(manifest_path)) manifest = JSON.parse(manifest_path);
+    let new_manifest: manifest;
+    if (manifest) new_manifest = Object.assign({}, manifest);
 
-    for (let packname of packnames) {
+
+    if (manifest) last_packID = manifest.lastID + 1;
+
+    for (let packname of packnames) { // sort packs & push them
         let id: number;
+        let old_pack: old_pack = undefined;
         if (manifest) {
-            let listed: number = 0;
-            for (let pack in manifest.packs) {
-                if (manifest.packs[pack].packname == packname) id = manifest.packs[pack].packid;
-                else listed++;
+            let found: boolean = false;
+            for (let pack of manifest.packs) {
+                if (pack.packname == packname) {
+                    id = pack.packid;
+                    old_pack = pack;
+                    found = true
+                }
             }
-            if (listed == manifest.packs.length) {
+            if (!found) {
                 id = last_packID++;
                 new_manifest.packs.push({
                     packid: id,
@@ -44,14 +52,15 @@ export function compile(compile_from: string, compile_to: string, manifest_path:
                     models: undefined
                 })
             }
-        } else id = last_packID++
+        } else id = last_packID++;
 
-        packs.push(new pack(path.join(compile_from, packname), id));
+        packs.push(new pack(path.join(compile_from, packname), id, old_pack));
     }
 
-    if (manifest) packs.sort((a, b) => { return a.id - b.id; });
-
-    if (manifest) fs.writeFileSync(manifest_path, JSON.stringify(new_manifest));
+    if (manifest) {
+        packs.sort((a, b) => { return a.id - b.id; });
+        fs.writeFileSync(manifest_path, JSON.stringify(new_manifest));
+    }
 
     for (let pack of packs) assets_formats.push(pack.asset_format);
     setup_output.resources(compile_to, Math.max(...assets_formats));
