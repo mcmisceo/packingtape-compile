@@ -78,7 +78,7 @@ export function compile(compile_from: string, compile_to: string, manifest_path:
         tag_ns();
     }
 
-    mpm(packs);
+    mpm(packs, manifest_path);
     lootmerge(packs);
     json_clean(compile_to);
 }

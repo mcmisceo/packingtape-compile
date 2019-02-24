@@ -4,34 +4,39 @@ import * as path from 'path'
 import { pack } from './../../classes/pack'
 import { mpm_model } from './../../classes/json_schema/mpm_model'
 import { model } from './../../classes/json_schema/minecraft/model'
+import { manifest } from './../../classes/json_schema/manifest'
 
 class output_model {
+    pair: string
     id: string
     cmd: number
     old: boolean = undefined
 }
 
-export function mpm(packs: Array<pack>) {
-    let models_list: Array<Array<mpm_model>>;
-    let output_models: Array<output_model>;
+export function mpm(packs: Array<pack>, manifest_path: string) {
+    let models_list: Array<Array<mpm_model>> = [];
+    let output_models: Array<output_model> = [];
+
 
     for (let pack of packs) {
-        if (pack.old) {
-            if (pack.old.models == pack.models) {
-                models_list.push(pack.models);
-            } else {
-                let models: Array<mpm_model> = pack.old.models.slice();
-                for (let model of pack.models) {
-                    for (let [index, old_model] of Object.entries(pack.old.models)) {
-                        if (old_model == model) {
-                            models.slice(parseInt(index));
-                            models.push(model);
+        if (pack.models) {
+            if (pack.old) {
+                if (pack.old.models == pack.models) {
+                    models_list.push(pack.models);
+                } else {
+                    let models: Array<mpm_model> = pack.old.models.slice();
+                    for (let model of pack.models) {
+                        for (let [index, old_model] of Object.entries(pack.old.models)) {
+                            if (old_model == model) {
+                                models.slice(parseInt(index));
+                                models.push(model);
+                            }
                         }
                     }
                 }
+            } else {
+                models_list.push(pack.models);
             }
-        } else {
-            models_list.push(pack.models);
         }
     }
 
@@ -87,6 +92,7 @@ export function mpm(packs: Array<pack>) {
             }
 
             output_models.push({
+                pair: model.namespace + ':' + model.id,
                 id: output_id,
                 cmd: output_cmd,
                 old: old
@@ -94,12 +100,76 @@ export function mpm(packs: Array<pack>) {
         }
     }
 
-    let olds: Array<output_model>;
+    let olds: Array<output_model> = [];
     for (let [index, model] of Object.entries(output_models)) {
         if (model.old) {
-            olds.push(model);
+            let collision: boolean = false;
+            for (let [index_, model_] of Object.entries(output_models)) {
+                if (model.pair == model_.pair && index != index_) collision = true;
+            }
+            if (!collision) olds.push(model);
             output_models.slice(parseInt(index))
         }
     }
     output_models = [...olds, ...output_models];
+
+    class material {
+        material: string
+        models: Array<output_model>
+    }
+    let materials: Array<material> = [];
+    for (let model of output_models) {
+        let found: boolean = false;
+        for (let material of materials) {
+            if (material.material == model.id) {
+                material.models.push(model)
+                found = true;
+            }
+        }
+        if (!found) materials.push({
+            material: model.id,
+            models: [model]
+        });
+    }
+    output_models = [];
+    for (let material of materials) {
+        let cmd: number = 1;
+        for (let model of material.models) {
+            if (model.old) output_models.push(model); else {
+                model.cmd = cmd++;
+                output_models.push(model);
+            }
+        }
+    }
+
+    for (let output_model of output_models) console.log(output_model);
+    // now is when we can parse through all the mcfunctions, loot tables, and advancements
+
+    for (let pack of packs) {
+        let mcfunction_file_paths: Array<string> = [];
+        for (let namespace of fs.readdirSync(path.join(pack.input_path, "data"))) {
+            for (let functions of fs.readdirSync(path.join(pack.input_path, "data", namespace, "functions"))) {
+                for (let entry of functions)
+                    if (entry.split(".")[entry.split(".").length - 1] == "mcfunction")
+                        mcfunction_file_paths.push(path.join(pack.input_path, "data", namespace, "functions", entry));
+            }
+        }
+    }
+
+
+    for (let pack in models_list) {
+        let manifest_edit: manifest;
+        fs.readFile(manifest_path, "utf-8", (err, data) => {
+            if (err) throw err;
+
+            manifest_edit = JSON.parse(data);
+            if (!manifest_edit.packs[pack]) manifest_edit.packs[pack] = [{}];
+            manifest_edit.packs[pack].models = manifest_models
+        });
+        fs.writeFile(manifest_path, manifest_edit, (err) => {
+            if (err) throw err;
+        })
+    }
+
+
 }

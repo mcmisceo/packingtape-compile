@@ -8,6 +8,12 @@
             "id": "magic_wand",
             "file": "item/wands/magic_wand.json", // full path in rp would be assets/magilore/models/item/wands/magic_wand.json
             "item": "mpm:use_detect"
+        },
+        {
+            "namespace": "magilore",
+            "id": "fire_wand",
+            "file": "item/wands/fire_wand.json", // full path in rp would be assets/magilore/models/item/wands/magic_wand.json
+            "item": "mpm:use_detect"
         }
     ]
 }
