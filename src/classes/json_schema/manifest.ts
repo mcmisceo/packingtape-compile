@@ -1,7 +1,7 @@
 import { mpm_model } from './mpm_model'
 
 export class manifest {
-    packs: old_pack;
+    packs: Array<old_pack>;
     lastID: number;
 }
 

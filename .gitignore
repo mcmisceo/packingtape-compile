@@ -1,5 +1,3 @@
-.vscode
-.vsls.json
 node_modules
 package-lock.json
 test/compile_to

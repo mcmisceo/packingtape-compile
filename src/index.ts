@@ -22,16 +22,36 @@ export function compile(compile_from: string, compile_to: string, manifest_path:
     const packnames: Array<string> = fs.readdirSync(compile_from, "utf8");
     let assets_formats: Array<number> = [];
     let manifest: manifest = undefined;
+    let new_manifest: manifest = manifest;
 
-    //if (check_manifest) if (fs.existsSync(manifest_path)) manifest = hjson.parse(manifest_path);
-    //last_packID = last_packID + manifest.lastID + 1;
+    if (check_manifest) if (fs.existsSync(manifest_path)) manifest = hjson.parse(manifest_path);
+    last_packID = last_packID + manifest.lastID + 1;
 
-    for (let packname of packnames) packs.push(new pack(path.join(compile_from, packname), last_packID++));
+    for (let packname of packnames) {
+        let id: number;
+        if (manifest) {
+            let listed: number = 0;
+            for (let pack in manifest.packs) {
+                if (manifest.packs[pack].packname == packname) id = manifest.packs[pack].packid;
+                else listed++;
+            }
+            if (listed == manifest.packs.length) {
+                id = last_packID++;
+                new_manifest.packs.push({
+                    packid: id,
+                    packname: packname,
+                    objectives: undefined,
+                    models: undefined
+                })
+            }
+        } else id = last_packID++
 
+        packs.push(new pack(path.join(compile_from, packname), id));
+    }
 
-    //if(manifest) fs.writeFileSync(manifest_path, JSON.stringify());
+    if (manifest) packs.sort((a, b) => { return a.id - b.id; });
 
-
+    if (manifest) fs.writeFileSync(manifest_path, JSON.stringify(new_manifest));
 
     for (let pack of packs) assets_formats.push(pack.asset_format);
     setup_output.resources(compile_to, Math.max(...assets_formats));
@@ -54,4 +74,4 @@ export function compile(compile_from: string, compile_to: string, manifest_path:
     json_clean(compile_to);
 }
 
-compile("./test/compile_from", "./test/compile_to", undefined, true); // aight lets try it
+compile("./test/compile_from", "./test/compile_to", undefined, true);
