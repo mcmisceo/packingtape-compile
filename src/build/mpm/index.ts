@@ -163,13 +163,13 @@ export function mpm(packs: Array<pack>, manifest_path: string) {
         manifest_edit = JSON.parse(data);
     });
     for (let pack in models_list) {
-        manifest_edit.packs[pack] = manifest_edit.packs[pack] || {
+        if(manifest_edit.packs[pack]) manifest_edit.packs[pack].models = manifest_models
+        else manifest_edit.packs[pack] = manifest_edit.packs[pack] || {
             packname: null,
             packid: null,
             objectives: null,
-            models: null
+            models: manifest_models
         };
-        manifest_edit.packs[pack].models = manifest_models
     }
     fs.writeFile(manifest_path, JSON.stringify(manifest_edit), (err: any) => {
         if (err) throw err;
