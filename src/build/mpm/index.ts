@@ -164,7 +164,7 @@ export function mpm(packs: Array<pack>, manifest_path: string) {
     });
     for (let pack in models_list) {
         if(manifest_edit.packs[pack]) manifest_edit.packs[pack].models = manifest_models
-        else manifest_edit.packs[pack] = manifest_edit.packs[pack] || {
+        else manifest_edit.packs[pack] = {
             packname: null,
             packid: null,
             objectives: null,
