@@ -171,7 +171,7 @@ export function mpm(packs: Array<pack>, manifest_path: string) {
         };
         manifest_edit.packs[pack].models = manifest_models
     }
-    fs.writeFile(manifest_path, manifest_edit, (err: any) => {
+    fs.writeFile(manifest_path, JSON.stringify(manifest_edit), (err: any) => {
         if (err) throw err;
     })
 
