@@ -2,7 +2,7 @@
     "overrides": [
         {
             "predicate": {
-                "custommodeldata": "1"
+                "custommodeldata": 1
             },
             "model": "ttb:item/amethyst"
         }
