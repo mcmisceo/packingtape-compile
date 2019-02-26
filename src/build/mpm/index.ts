@@ -157,19 +157,23 @@ export function mpm(packs: Array<pack>, manifest_path: string) {
     }
 
 
+    let manifest_edit: manifest
+    fs.readFile(manifest_path, "utf-8", (err: any, data: string) => {
+        if (err) throw err;
+        manifest_edit = JSON.parse(data);
+    });
     for (let pack in models_list) {
-        let manifest_edit: manifest;
-        fs.readFile(manifest_path, "utf-8", (err, data) => {
-            if (err) throw err;
-
-            manifest_edit = JSON.parse(data);
-            if (!manifest_edit.packs[pack]) manifest_edit.packs[pack] = [{}];
-            manifest_edit.packs[pack].models = manifest_models
-        });
-        fs.writeFile(manifest_path, manifest_edit, (err) => {
-            if (err) throw err;
-        })
+        if(manifest_edit.packs[pack]) manifest_edit.packs[pack].models = manifest_models
+        else manifest_edit.packs[pack] = {
+            packname: null,
+            packid: null,
+            objectives: null,
+            models: manifest_models
+        };
     }
+    fs.writeFile(manifest_path, JSON.stringify(manifest_edit), (err: any) => {
+        if (err) throw err;
+    })
 
 
 }
