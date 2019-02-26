@@ -10,6 +10,7 @@ class output_model {
     pair: string
     id: string
     cmd: number
+    file: string
     old: boolean = undefined
 }
 
@@ -44,6 +45,8 @@ export function mpm(packs: Array<pack>, manifest_path: string) {
         for (let model of models) {
             let output_id: string;
             let output_cmd: number = undefined;
+            let output_file: string = path.join(model.namespace, "models", "item", model.id);
+            if (model.file) output_file = model.file;
             let old: boolean = false;
 
             if (!model.old) {
@@ -95,6 +98,7 @@ export function mpm(packs: Array<pack>, manifest_path: string) {
                 pair: model.namespace + ':' + model.id,
                 id: output_id,
                 cmd: output_cmd,
+                file: output_file,
                 old: old
             })
         }
@@ -157,13 +161,13 @@ export function mpm(packs: Array<pack>, manifest_path: string) {
     }
 
 
-    let manifest_edit: manifest
+    /*let manifest_edit: manifest
     fs.readFile(manifest_path, "utf-8", (err: any, data: string) => {
         if (err) throw err;
         manifest_edit = JSON.parse(data);
     });
     for (let pack in models_list) {
-        if(manifest_edit.packs[pack]) manifest_edit.packs[pack].models = manifest_models
+        if (manifest_edit.packs[pack]) manifest_edit.packs[pack].models = manifest_models
         else manifest_edit.packs[pack] = {
             packname: null,
             packid: null,
@@ -173,7 +177,7 @@ export function mpm(packs: Array<pack>, manifest_path: string) {
     }
     fs.writeFile(manifest_path, JSON.stringify(manifest_edit), (err: any) => {
         if (err) throw err;
-    })
+    })*/
 
 
 }
