@@ -57,34 +57,36 @@ export function mpm(packs: Array<pack>, manifest_path: string) {
 
                 if (namespace = "mpm") {
                     let path = id.split('.');
-                    if (path[0] == "use_detect") output_id = "minecraft:carrot_on_a_stick";
-                    if (path[0] == "default") if (!path[1]) output_id = "minecraft:clock"; else {
-                        if (path[1] == "single") output_id = "minecraft:carrot_on_a_stick";
-                        else if (path[1] == "full") output_id = "minecraft:clock"; else {
-                            console.warn("Namespace " + model.namespace + " has an invalid mpm.default value on " + model.id + ".")
-                        }
-                    }
-                    if (path[0] == "peripheral") {//USE SWITCH STATEMENTS
-                        switch(path[1]) {
-                            case "pickaxe": output_id = "minecraft:wooden_pickaxe"; break;
-                            case "axe":     output_id = "minecraft:wooden_axe"; break;
-                            case "shovel":  output_id = "minecraft:wooden_shovel"; break;
-                            case "hoe":     output_id = "minecraft:wooden_hoe"; break;
-                            case "sword":   output_id = "minecraft:wooden_sword"; break;
-                            case "body":
-                                switch(path[2]) {
-                                    case "head":  output_id = "minecraft:chainmail_helmet"; break;
-                                    case "chest": output_id = "minecraft:chainmail_chestplate"; break;
-                                    case "legs":  output_id = "minecraft:chainmail_leggings"; break;
-                                    case "feet":  output_id = "minecraft:chainmail_boots"; break;
-                                    default: 
-                                        if (path[2]) console.warn("Namespace " + model.namespace + " has an invalid slot for mpm.body on " + model.id + ".");
-                                        else console.warn("Namespace " + model.namespace + " is missing a slot in mpm.body on " + model.id + ".");
-                                        break;
-                                }
-                                break;
-                            default: 
-                                console.warn("Namespace " + model.namespace + " has an invalid mpm item type on " + model.id + ".")
+                    switch(path[0]) {
+                        case "use_detect": output_id = "minecraft:carrot_on_a_stick"; break;
+                        case "default": 
+                            switch(path[1]) {
+                                case "single": output_id = "minecraft:carrot_on_a_stick"; break;
+                                case "full":   output_id = "minecraft:clock"; break;
+                                default: 
+                                    if (!path[1]) output_id = "minecraft:clock";
+                                    else console.warn("Namespace " + model.namespace + " has an invalid mpm.default value on " + model.id + ".")
+                            }
+                            break;
+                        case "peripheral": //Shield?
+                            switch(path[1]) {
+                                case "pickaxe": output_id = "minecraft:wooden_pickaxe"; break;
+                                case "axe":     output_id = "minecraft:wooden_axe"; break;
+                                case "shovel":  output_id = "minecraft:wooden_shovel"; break;
+                                case "hoe":     output_id = "minecraft:wooden_hoe"; break;
+                                case "sword":   output_id = "minecraft:wooden_sword"; break;
+                                case "body":
+                                    switch(path[2]) {
+                                        case "head":  output_id = "minecraft:chainmail_helmet"; break;
+                                        case "chest": output_id = "minecraft:chainmail_chestplate"; break;
+                                        case "legs":  output_id = "minecraft:chainmail_leggings"; break;
+                                        case "feet":  output_id = "minecraft:chainmail_boots"; break;
+                                        default: 
+                                            if (path[2]) console.warn("Namespace " + model.namespace + " has an invalid slot for mpm.body on " + model.id + ".");
+                                            else console.warn("Namespace " + model.namespace + " is missing a slot in mpm.body on " + model.id + ".");
+                                    }
+                                    break;
+                                default: console.warn("Namespace " + model.namespace + " has an invalid mpm item type on " + model.id + ".")
                         }
                     }
                 } else {
