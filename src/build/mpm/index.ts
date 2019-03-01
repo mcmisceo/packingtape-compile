@@ -57,7 +57,7 @@ export function mpm(packs: Array<pack>, manifest_path: string) {
 
                 if (namespace = "mpm") {
                     let path = id.split('.');
-                    switch(path[0]) {
+                    switch(path[0]) { //Switch statements are better than if/else blocks but still not great. I'm gonna make an object lookup solution.
                         case "use_detect": output_id = "minecraft:carrot_on_a_stick"; break;
                         case "default": 
                             switch(path[1]) {
@@ -87,7 +87,9 @@ export function mpm(packs: Array<pack>, manifest_path: string) {
                                     }
                                     break;
                                 default: console.warn("Namespace " + model.namespace + " has an invalid mpm item type on " + model.id + ".")
-                        }
+                            }
+                        default: //?????
+                            console.warn("Namespace " + model.namespace + " has an invalid item on " + model.id + ".")
                     }
                 } else {
                     output_id = id;
