@@ -19,6 +19,7 @@ export function mpm(packs: Array<pack>, manifest_path: string) {
     let output_models: Array<output_model> = [];
 
 
+
     for (let pack of packs) {
         if (pack.models) {
             if (pack.old) {
@@ -145,39 +146,119 @@ export function mpm(packs: Array<pack>, manifest_path: string) {
             }
         }
     }
-
     for (let output_model of output_models) console.log(output_model);
-    // now is when we can parse through all the mcfunctions, loot tables, and advancements
 
+
+
+    // now is when we can parse through all the mcfunctions, loot tables, and advancements [leave comment]
+    const mcfunction_file_paths: Array<string> = [];
+    const loot_table_file_paths: Array<string> = [];
+    const advancement_file_paths: Array<string> = [];
     for (let pack of packs) {
-        let mcfunction_file_paths: Array<string> = [];
         for (let namespace of fs.readdirSync(path.join(pack.input_path, "data"))) {
-            for (let functions of fs.readdirSync(path.join(pack.input_path, "data", namespace, "functions"))) {
-                for (let entry of functions)
-                    if (entry.split(".")[entry.split(".").length - 1] == "mcfunction")
-                        mcfunction_file_paths.push(path.join(pack.input_path, "data", namespace, "functions", entry));
+            const functions_path = path.join(pack.input_path, "data", namespace, "functions");
+            if (fs.existsSync(functions_path)) for (let file of fs.readdirSync(functions_path)) {
+                recurse_files(functions_path, file, [".mcfunction"], mcfunction_file_paths);
+            }
+            const json_exts: Array<string> = [".json", ".jsonc", ".hjson"]
+            const loot_tables_path = path.join(pack.input_path, "data", namespace, "loot_tables");
+            if (fs.existsSync(loot_tables_path)) for (let file of fs.readdirSync(loot_tables_path)) {
+                recurse_files(loot_tables_path, file, json_exts, loot_table_file_paths);
+            }
+            const advancement_path = path.join(pack.input_path, "data", namespace, "advancements");
+            if (fs.existsSync(advancement_path)) for (let file of fs.readdirSync(advancement_path)) {
+                recurse_files(advancement_path, file, json_exts, advancement_file_paths);
+            }
+        }
+    }
+    function recurse_files(folder: string, file: string, ext: Array<string>, arr: Array<string>) {
+        const file_path = path.join(folder, file);
+        if (fs.lstatSync(file_path).isDirectory()) {
+            for (let file of fs.readdirSync(file_path)) {
+                recurse_files(file_path, file, ext, arr);
+            }
+        } else if (ext.includes(path.extname(file))) {
+            //I am the Google God, lmfao [LEAVE COMMENT] ~~entry.split(".")[entry.split(".").length - 1]~~
+            arr.push(file_path);
+        }
+    }
+    console.log(mcfunction_file_paths);
+    console.log(loot_table_file_paths);
+    console.log(advancement_file_paths);
+
+    function readLines(input): Array<string> {
+        let remaining = '';
+        let output: Array<string> = [];
+
+        remaining += input;
+        var index = remaining.indexOf('\n');
+        var last = 0;
+        while (index > -1) {
+            var line = remaining.substring(last, index);
+            last = index + 1;
+            output.push(line);
+            index = remaining.indexOf('\n', last);
+        }
+
+        remaining = remaining.substring(last);
+
+        if (remaining.length > 0) {
+            output.push(remaining);
+        }
+
+        return output;
+    }
+
+    for (let mcfunction of mcfunction_file_paths) {
+        let function_file: string = fs.readFileSync(mcfunction, {encoding: 'utf8'});
+
+        let lines: Array<string> = readLines(function_file);
+        for (let line of lines) {
+            for (let output_model of output_models) {
+                if (RegExp('(?:^|[^\\\\])((\\\\\\\\)*\\$' + output_model.pair + ')').test(line)) {
+                    console.log("Hit $" + output_model.pair + " in " + mcfunction);
+                    // now to parse the command :thy:
+                    if (/^([\w\-]+)/.test(line) && line.match(/^([\w\-]+)/)[0] == 'give') {
+                        if (!line.includes('{')) line = line.replace(
+                            RegExp('(?:^|[^\\\\])((\\\\\\\\)*\\$' + output_model.pair + ')'),
+                            ' ' + output_model.id + '{CustomModelData:' + output_model.cmd + '}'); 
+                        else if (line.includes('}')) {
+                            line = line.replace(
+                                RegExp('(?:^|[^\\\\])((\\\\\\\\)*\\$' + output_model.pair + ')'),
+                                ' ' + output_model.id
+                            )
+                            line = line.replace(
+                                /.$/,
+                                'CustomModelData:' + output_model.cmd + '}'
+                            ); // not working yet
+                        }
+                        console.log(line)
+                    }
+                    if (/^([\w\-]+)/.test(line) && line.match(/^([\w\-]+)/)[0] == 'setblock') {
+                        console.log("foo");
+                    }
+                }
             }
         }
     }
 
-
-    /*let manifest_edit: manifest
-    fs.readFile(manifest_path, "utf-8", (err: any, data: string) => {
-        if (err) throw err;
-        manifest_edit = JSON.parse(data);
-    });
-    for (let pack in models_list) {
-        if (manifest_edit.packs[pack]) manifest_edit.packs[pack].models = manifest_models
-        else manifest_edit.packs[pack] = {
-            packname: null,
-            packid: null,
-            objectives: null,
-            models: manifest_models
-        };
+    if (manifest_path) { 
+        let manifest_edit: manifest
+        fs.readFile(manifest_path, "utf-8", (err: any, data: string) => {
+            if (err) throw err;
+            manifest_edit = JSON.parse(data);
+        });
+        for (let pack in models_list) {
+            if (manifest_edit.packs[pack]) manifest_edit.packs[pack].models = models_list[pack]
+            else manifest_edit.packs[pack] = { //Init in the case it doesn't already exist [leave comment]
+                packname: null,
+                packid: null,
+                objectives: null,
+                models: models_list[pack]
+            };
+        }
+        fs.writeFile(manifest_path, JSON.stringify(manifest_edit), (err: any) => {
+            if (err) throw err;
+        })
     }
-    fs.writeFile(manifest_path, JSON.stringify(manifest_edit), (err: any) => {
-        if (err) throw err;
-    })*/
-
-
 }
