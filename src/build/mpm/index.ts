@@ -88,7 +88,7 @@ export function mpm(packs: Array<pack>, manifest_path: string) {
                                     break;
                                 default: console.warn("Namespace " + model.namespace + " has an invalid mpm item type on " + model.id + ".")
                             }
-                        default: //?????
+                        default:
                             console.warn("Namespace " + model.namespace + " has an invalid item on " + model.id + ".")
                     }
                 } else {
