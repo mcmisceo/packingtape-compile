@@ -5,16 +5,43 @@ import { pack } from './../../classes/pack'
 import { mpm_model } from './../../classes/json_schema/mpm_model'
 import { model } from './../../classes/json_schema/minecraft/model'
 import { manifest } from './../../classes/json_schema/manifest'
+import { DetailedPeerCertificate } from 'tls';
 
 class output_model {
     pair: string
-    id: string
-    cmd: number
+    id:   string
+    cmd:  number
     file: string
-    old: boolean = undefined
+    old:  boolean = undefined
+}
+const item_tree: object = {
+    use_detect:  "minecraft:carrot_on_a_stick",
+    default: {
+        single: "minecraft:carrot_on_a_stick",
+        full:   "minecraft:clock",
+        '':     "minecraft:clock",
+        error:  " has an invalid mpm.default value on ",
+    },
+    peripheral: {
+        pickaxe: "minecraft:wooden_pickaxe",
+        axe:     "minecraft:wooden_axe",
+        shovel:  "minecraft:wooden_shovel",
+        hoe:     "minecraft:wooden_hoe",
+        sword:   "minecraft:wooden_sword",
+        body: {
+            head:  "minecraft:chainmail_helmet",
+            chest: "minecraft:chainmail_chestplate",
+            legs:  "minecraft:chainmail_leggings",
+            feet:  "minecraft:chainmail_boots",
+            error: " has an invalid slot for mpm.body on "
+        },
+        error: " has an invalid mpm item type on "
+    },
+    error: " has an invalid item on "
 }
 
-export function mpm(packs: Array<pack>, manifest_path: string) {
+
+export function mpm(packs: Array<pack>, compile_from: string, compile_to: string, manifest_path: string) {
     let models_list: Array<Array<mpm_model>> = [];
     let output_models: Array<output_model> = [];
 
@@ -56,41 +83,7 @@ export function mpm(packs: Array<pack>, manifest_path: string) {
                 let id: string = model.item.split(':')[1];
 
                 if (namespace = "mpm") {
-                    let path = id.split('.');
-                    switch(path[0]) { //Switch statements are better than if/else blocks but still not great. I'm gonna make an object lookup solution.
-                        case "use_detect": output_id = "minecraft:carrot_on_a_stick"; break;
-                        case "default": 
-                            switch(path[1]) {
-                                case "single": output_id = "minecraft:carrot_on_a_stick"; break;
-                                case "full":   output_id = "minecraft:clock"; break;
-                                default: 
-                                    if (!path[1]) output_id = "minecraft:clock";
-                                    else console.warn("Namespace " + model.namespace + " has an invalid mpm.default value on " + model.id + ".")
-                            }
-                            break;
-                        case "peripheral": //Shield?
-                            switch(path[1]) {
-                                case "pickaxe": output_id = "minecraft:wooden_pickaxe"; break;
-                                case "axe":     output_id = "minecraft:wooden_axe"; break;
-                                case "shovel":  output_id = "minecraft:wooden_shovel"; break;
-                                case "hoe":     output_id = "minecraft:wooden_hoe"; break;
-                                case "sword":   output_id = "minecraft:wooden_sword"; break;
-                                case "body":
-                                    switch(path[2]) {
-                                        case "head":  output_id = "minecraft:chainmail_helmet"; break;
-                                        case "chest": output_id = "minecraft:chainmail_chestplate"; break;
-                                        case "legs":  output_id = "minecraft:chainmail_leggings"; break;
-                                        case "feet":  output_id = "minecraft:chainmail_boots"; break;
-                                        default: 
-                                            if (path[2]) console.warn("Namespace " + model.namespace + " has an invalid slot for mpm.body on " + model.id + ".");
-                                            else console.warn("Namespace " + model.namespace + " is missing a slot in mpm.body on " + model.id + ".");
-                                    }
-                                    break;
-                                default: console.warn("Namespace " + model.namespace + " has an invalid mpm item type on " + model.id + ".")
-                            }
-                        default:
-                            console.warn("Namespace " + model.namespace + " has an invalid item on " + model.id + ".")
-                    }
+                    output_id = get_from_item_tree(id.split('.'),item_tree,model.namespace,model.id);
                 } else {
                     output_id = id;
                 }
@@ -109,6 +102,16 @@ export function mpm(packs: Array<pack>, manifest_path: string) {
             })
         }
     }
+    function get_from_item_tree(path: Array<string>, tree: any, namespace: string, id: string) {
+        const resolved = tree[path[0]];
+        if (!resolved) console.warn("Namespace " + namespace + tree.error + id + ".");
+        if (typeof resolved === "object") return get_from_item_tree(path.slice(1),resolved,namespace,id);
+        else if (typeof resolved == "string") return resolved;
+        else console.warn("Malformed item tree!")
+    }
+
+
+
 
     let olds: Array<output_model> = [];
     for (let [index, model] of Object.entries(output_models)) {
@@ -220,31 +223,28 @@ export function mpm(packs: Array<pack>, manifest_path: string) {
         let lines: Array<string> = readLines(function_file);
         for (let line of lines) {
             for (let output_model of output_models) {
-                if (RegExp('(?:^|[^\\\\])((\\\\\\\\)*\\$' + output_model.pair + ')').test(line)) {
-                    console.log("Hit $" + output_model.pair + " in " + mcfunction);
-                    // now to parse the command :thy:
-                    if (/^([\w\-]+)/.test(line) && line.match(/^([\w\-]+)/)[0] == 'give') {
-                        if (!line.includes('{')) line = line.replace(
-                            RegExp('(?:^|[^\\\\])((\\\\\\\\)*\\$' + output_model.pair + ')'),
-                            ' ' + output_model.id + '{CustomModelData:' + output_model.cmd + '}'); 
-                        else if (line.includes('}')) {
-                            line = line.replace(
-                                RegExp('(?:^|[^\\\\])((\\\\\\\\)*\\$' + output_model.pair + ')'),
-                                ' ' + output_model.id
-                            )
-                            line = line.replace(
-                                /.$/,
-                                'CustomModelData:' + output_model.cmd + '}'
-                            ); // not working yet
-                        }
-                        console.log(line)
-                    }
-                    if (/^([\w\-]+)/.test(line) && line.match(/^([\w\-]+)/)[0] == 'setblock') {
-                        console.log("foo");
-                    }
+                const dollar_finder1: string = '(?:^|[^\\\\])('
+                const dollar_finder2: string = '(\\\\\\\\)*\\$'
+                /*
+                class output_model {//thanks fam
+                    pair: string (ie mechanization:foo_bar)
+                    id:   string (ie minecraft:carrot_on_a_stick)
+                    cmd:  number (the CustomModelData nbt value)
+                    file: string (don't mess with)
+                    old:  boolean = undefined (don't mess with)
                 }
+                */
+                line = line.replace(RegExp(dollar_finder1 + 'id:"' + dollar_finder2 + output_model.pair + '")', 'g'),(match: string)=>{
+                    return match[0] + 'id:"' + output_model.id + '",tag:{CustomModelData:' + output_model.cmd + '\})';})
+                .replace(RegExp(dollar_finder1 + '^give @.+? ' + dollar_finder2 + output_model.pair + ')'),(match: string, offset: number)=>{ // lets see if this thing works, oh yeah ill put a .cmd somewhere
+                    return line.match(/^give @.+? /) + output_model.id + '{CustomModelData:' + output_model.cmd + '}';}) 
+                .replace(/\}\{/g,'');
+                console.log(line);
             }
-        }
+        } // don't start on adding it back in yet, I wanna get file writing working first
+        console.log(mcfunction.replace(path.join(compile_to), path.join(compile_from)));
+        fs.createFileSync(mcfunction.replace(path.join(compile_to), path.join(compile_from)));
+        fs.writeFileSync(mcfunction.replace(path.join(compile_to), path.join(compile_from)), lines);
     }
 
     if (manifest_path) { 

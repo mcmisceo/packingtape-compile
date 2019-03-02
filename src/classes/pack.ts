@@ -4,6 +4,7 @@ import * as hjson from 'hjson';
 
 import { parsed_pack } from './parsed_pack'
 import { mpm_model } from './json_schema/mpm_model'
+import { ccm_character } from './json_schema/ccm_character'
 import { old_pack } from './old_pack'
 
 export class pack {
@@ -15,6 +16,7 @@ export class pack {
     data_format: number;
     asset_format: number;
     models: Array<mpm_model>;
+    characters: Array<ccm_character>;
     old: old_pack = undefined;
 
     constructor(pack_path: string, id: number, old: old_pack) {
@@ -39,6 +41,7 @@ export class pack {
         this.data_format = pack.data_format;
         this.asset_format = pack.assets_format;
         this.models = pack.models;
+        this.characters = pack.characters;
         if (old) this.old = old;
     }
 }
