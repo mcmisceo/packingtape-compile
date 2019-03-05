@@ -234,18 +234,80 @@ export function mpm(packs: Array<pack>, compile_from: string, compile_to: string
                     old:  boolean = undefined (don't mess with)
                 }
                 */
-                line = line.replace(RegExp(dollar_finder1 + 'id:"' + dollar_finder2 + output_model.pair + '")', 'g'),(match: string)=>{
-                    return match[0] + 'id:"' + output_model.id + '",tag:{CustomModelData:' + output_model.cmd + '\}';})
-                .replace(RegExp(dollar_finder1 + '^give @.+? ' + dollar_finder2 + output_model.pair + ')'),(match: string, offset: number)=>{ // lets see if this thing works, oh yeah ill put a .cmd somewhere
-                    return line.match(/^give @.+? /) + output_model.id + '{CustomModelData:' + output_model.cmd + '}';}) 
-                .replace(/\}\{/g,'');
-                console.log(line);
+               
+                //line = line.replace(RegExp(dollar_finder1 + 'id:"' + dollar_finder2 + output_model.pair + '")', 'g'), (match: string)=>{
+                //    /*
+                //    Start at match.length
+                //    Find the closing-brace that ends the current scope
+                //    Or find the next instance of `tag` that isn't in a quote or deeper scope
+                //    Proceed with replacement
+                //    Profit
+                //    */
+                //   
+                //    let depth:number = 1;
+                //    let inString:boolean = false;
+                //    let stringChar:string = null;
+                //    for(let i=match.length; i<line.length; i++){
+                //        switch(line[i]){
+                //            case '{': if(!inString) depth++; break;
+                //            case '}': if(!inString) depth--; break;
+                //            case '"':
+                //                if(stringChar !== "'") {
+                //                    if(stringChar) stringChar = null;
+                //                    else stringChar = '"';
+                //                    inString = !inString;
+                //                }
+                //                break;
+                //            case "'":
+                //                if(stringChar !== '"') {
+                //                    if(stringChar) stringChar = null;
+                //                    else stringChar = "'";
+                //                    inString = !inString;
+                //                }
+                //                break;
+                //        }
+                //        if(!inString && line[i] + line[i+1] + line[i+2] === "tag"){
+                //            line = line.slice(0,i+4) + 'CustomModelData:' + output_model.cmd + ',' + line.slice(i+4);
+                //            return match[0] + 'id:"' + output_model.id + '"';
+                //        }else if(depth==0){
+                //            return match[0] + 'id:"' + output_model.id + '",tag:{CustomModelData:' + output_model.cmd + '\}';
+                //        }
+                //    }
+                //
+                //}).replace(RegExp(dollar_finder1 + '^give @.+? ' + dollar_finder2 + output_model.pair + ')'), ()=>{
+                //    return line.match(/^give @.+? /) + output_model.id + '{CustomModelData:' + output_model.cmd + '}';
+                //}).replace(/\}\{/g,'');
+                //console.log(line);//Ha, not my fault, thank GOD
+               
             }
             lines[index] = line;
         }
         console.log(mcfunction.replace(path.join(compile_to), path.join(compile_from, "datapacks")));
         fs.createFileSync(mcfunction.replace(path.join(compile_to), path.join(compile_from, "datapacks")));
         fs.writeFileSync(mcfunction.replace(path.join(compile_to), path.join(compile_from, "datapacks")), lines.join('\n'));
+    }
+
+    for (let material of materials) {
+        let namespace: string = material.material.split(":")[0];
+        let id: string = material.material.split(":")[1];
+        let output = {
+            overrides: []
+        }
+        for(let model of material.models) {
+            let output_override = {
+                predicate: {
+                    custom_model_data: model.cmd
+                },
+                model: model.pair.split(":")[0] + ':' + model.file
+            }
+            output.overrides.push(output_override);
+            console.log(output_override);
+        }
+        console.log(material.material)
+        console.log(output);
+        console.log(path.join(compile_from, "resources", "assets", namespace, "models", "item", id + ".json"));
+        //fs.createFileSync(path.join(compile_from, "resources", "assets", namespace, "models", "item", id + ".json"));
+        //fs.writeFileSync(path.join(compile_from, "resources", "assets", namespace, "models", "item", id + ".json"), JSON.stringify(output));
     }
 
     if (manifest_path) { 
