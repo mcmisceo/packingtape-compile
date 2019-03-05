@@ -7,4 +7,5 @@ let lines = ["foo", "bar", "foo"]
 //file.on('error', function(err) { /* error handling */ });
 //lines.forEach(function(v) { file.write(v + '\n'); });
 //file.end();
-fs.writeFileSync('test/compile_to/mechanization/data/mechanization/functions/give/mystic_chestplate.mcfunction', lines);
+console.log(lines.join('\n'));
+fs.writeFileSync('test/compile_to/datapacks/mechanization/data/mechanization/functions/give/mystic_chestplate.mcfunction', lines.join('\n'));

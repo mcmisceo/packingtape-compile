@@ -221,7 +221,7 @@ export function mpm(packs: Array<pack>, compile_from: string, compile_to: string
         let function_file: string = fs.readFileSync(mcfunction, {encoding: 'utf8'});
 
         let lines: Array<string> = readLines(function_file);
-        for (let line of lines) {
+        for (let [index, line] of Object.entries(lines)) {
             for (let output_model of output_models) {
                 const dollar_finder1: string = '(?:^|[^\\\\])('
                 const dollar_finder2: string = '(\\\\\\\\)*\\$'
@@ -235,16 +235,17 @@ export function mpm(packs: Array<pack>, compile_from: string, compile_to: string
                 }
                 */
                 line = line.replace(RegExp(dollar_finder1 + 'id:"' + dollar_finder2 + output_model.pair + '")', 'g'),(match: string)=>{
-                    return match[0] + 'id:"' + output_model.id + '",tag:{CustomModelData:' + output_model.cmd + '\})';})
+                    return match[0] + 'id:"' + output_model.id + '",tag:{CustomModelData:' + output_model.cmd + '\}';})
                 .replace(RegExp(dollar_finder1 + '^give @.+? ' + dollar_finder2 + output_model.pair + ')'),(match: string, offset: number)=>{ // lets see if this thing works, oh yeah ill put a .cmd somewhere
                     return line.match(/^give @.+? /) + output_model.id + '{CustomModelData:' + output_model.cmd + '}';}) 
                 .replace(/\}\{/g,'');
                 console.log(line);
             }
-        } // don't start on adding it back in yet, I wanna get file writing working first
-        console.log(mcfunction.replace(path.join(compile_to), path.join(compile_from)));
-        fs.createFileSync(mcfunction.replace(path.join(compile_to), path.join(compile_from)));
-        fs.writeFileSync(mcfunction.replace(path.join(compile_to), path.join(compile_from)), lines);
+            lines[index] = line;
+        }
+        console.log(mcfunction.replace(path.join(compile_to), path.join(compile_from, "datapacks")));
+        fs.createFileSync(mcfunction.replace(path.join(compile_to), path.join(compile_from, "datapacks")));
+        fs.writeFileSync(mcfunction.replace(path.join(compile_to), path.join(compile_from, "datapacks")), lines.join('\n'));
     }
 
     if (manifest_path) { 
