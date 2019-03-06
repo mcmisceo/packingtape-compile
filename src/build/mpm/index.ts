@@ -235,49 +235,49 @@ export function mpm(packs: Array<pack>, compile_from: string, compile_to: string
                 }
                 */
                
-                //line = line.replace(RegExp(dollar_finder1 + 'id:"' + dollar_finder2 + output_model.pair + '")', 'g'), (match: string)=>{
-                //    /*
-                //    Start at match.length
-                //    Find the closing-brace that ends the current scope
-                //    Or find the next instance of `tag` that isn't in a quote or deeper scope
-                //    Proceed with replacement
-                //    Profit
-                //    */
-                //   
-                //    let depth:number = 1;
-                //    let inString:boolean = false;
-                //    let stringChar:string = null;
-                //    for(let i=match.length; i<line.length; i++){
-                //        switch(line[i]){
-                //            case '{': if(!inString) depth++; break;
-                //            case '}': if(!inString) depth--; break;
-                //            case '"':
-                //                if(stringChar !== "'") {
-                //                    if(stringChar) stringChar = null;
-                //                    else stringChar = '"';
-                //                    inString = !inString;
-                //                }
-                //                break;
-                //            case "'":
-                //                if(stringChar !== '"') {
-                //                    if(stringChar) stringChar = null;
-                //                    else stringChar = "'";
-                //                    inString = !inString;
-                //                }
-                //                break;
-                //        }
-                //        if(!inString && line[i] + line[i+1] + line[i+2] === "tag"){
-                //            line = line.slice(0,i+4) + 'CustomModelData:' + output_model.cmd + ',' + line.slice(i+4);
-                //            return match[0] + 'id:"' + output_model.id + '"';
-                //        }else if(depth==0){
-                //            return match[0] + 'id:"' + output_model.id + '",tag:{CustomModelData:' + output_model.cmd + '\}';
-                //        }
-                //    }
-                //
-                //}).replace(RegExp(dollar_finder1 + '^give @.+? ' + dollar_finder2 + output_model.pair + ')'), ()=>{
-                //    return line.match(/^give @.+? /) + output_model.id + '{CustomModelData:' + output_model.cmd + '}';
-                //}).replace(/\}\{/g,'');
-                //console.log(line);//Ha, not my fault, thank GOD
+                line = line.replace(RegExp(dollar_finder1 + 'id:"' + dollar_finder2 + output_model.pair + '")', 'g'), (match: string)=>{
+                    /*
+                    Start at match.length
+                    Find the closing-brace that ends the current scope
+                    Or find the next instance of `tag` that isn't in a quote or deeper scope
+                    Proceed with replacement
+                    Profit
+                    */
+                   
+                    let depth:number = 0;
+                    let inString:boolean = false;
+                    let stringChar:string = null;
+                    for(let i=match.length; i<line.length; i++){
+                        switch(line[i]){
+                            case '{': if(!inString) depth++; break;
+                            case '}': if(!inString) depth--; break;
+                            case '"':
+                                if(stringChar !== "'") {
+                                    if(stringChar) stringChar = null;
+                                    else stringChar = '"';
+                                    inString = !inString;
+                                }
+                                break;
+                            case "'":
+                                if(stringChar !== '"') {
+                                    if(stringChar) stringChar = null;
+                                    else stringChar = "'";
+                                    inString = !inString;
+                                }
+                                break;
+                        }
+                        if(!inString && line[i] + line[i+1] + line[i+2] === "tag") {
+                            line = line.slice(0,i+4) + 'CustomModelData:' + output_model.cmd + ',' + line.slice(i+4);
+                            return match[0] + 'id:"' + output_model.id + '"';
+                        }else if(depth==0) {
+                            return match[0] + 'id:"' + output_model.id + '",tag:{CustomModelData:' + output_model.cmd + '\}';
+                        }
+                    }
+                
+                }).replace(RegExp(dollar_finder1 + '^give @.+? ' + dollar_finder2 + output_model.pair + ')'), ()=>{
+                    return line.match(/^give @.+? /) + output_model.id + '{CustomModelData:' + output_model.cmd + '}';
+                }).replace(/\}\{/g,'');
+                console.log(line);//Ha, not my fault, thank GOD
                
             }
             lines[index] = line;
