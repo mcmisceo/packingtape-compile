@@ -186,7 +186,7 @@ export function mpm(packs: Array<pack>, compile_from: string, compile_to: string
                 recurse_files(file_path, file, ext, arr);
             }
         } else if (ext.includes(path.extname(file))) {
-            //I am the Google God, lmfao [LEAVE COMMENT] ~~entry.split(".")[entry.split(".").length - 1]~~
+            // I am the Google God, lmfao [LEAVE COMMENT] ~~entry.split(".")[entry.split(".").length - 1]~~
             arr.push(file_path);
         }
     }
@@ -228,13 +228,13 @@ export function mpm(packs: Array<pack>, compile_from: string, compile_to: string
                 const dollar_finder1: string = '(?:^|[^\\\\])('
                 const dollar_finder2: string = '(\\\\\\\\)*\\$'
                 /*
-                class output_model {//thanks fam
-                    pair: string (ie mechanization:foo_bar)
-                    id:   string (ie minecraft:carrot_on_a_stick)
-                    cmd:  number (the CustomModelData nbt value)
-                    file: string (don't mess with)
-                    old:  boolean = undefined (don't mess with)
-                }
+                    class output_model {//thanks fam
+                        pair: string (ie mechanization:foo_bar)
+                        id:   string (ie minecraft:carrot_on_a_stick)
+                        cmd:  number (the CustomModelData nbt value)
+                        file: string (don't mess with)
+                        old:  boolean = undefined (don't mess with)
+                    }
                 */
                 let queuedCustomMD:number = null;
                 let oldLine = "";
@@ -245,11 +245,11 @@ export function mpm(packs: Array<pack>, compile_from: string, compile_to: string
                         p1 = p1;
                         undef = undef;
                         /*
-                        Start at match.length
-                        Find the closing-brace that ends the current scope
-                        Or find the next instance of `tag` that isn't in a quote or deeper scope
-                        Proceed with replacement
-                        Profit
+                            Start at match.length
+                            Find the closing-brace that ends the current scope
+                            Or find the next instance of `tag` that isn't in a quote or deeper scope
+                            Proceed with replacement
+                            Profit
                         */
                         let depth:number = 1;
                         let insideDoubleQuotes:boolean = false;

@@ -7,6 +7,7 @@ import * as no_parse from "./build/no_parse/index";
 import { pack } from "./classes/pack"
 import { json_clean } from "./build/json_clean/index"
 import { mpm } from "./build/mpm/index"
+import { ccm } from "./build/ccm/index"
 import { score_ns } from "./build/score_ns/index"
 import { tag_ns } from "./build/tag_ns/index"
 import { lootmerge } from "./build/lootmerge/index"
@@ -79,6 +80,7 @@ export function compile(compile_from: string, compile_to: string, manifest_path:
     }
 
     mpm(packs, compile_to, compile_from, manifest_path);
+    ccm(packs, compile_to, compile_from);
     lootmerge(packs);
     json_clean(compile_to);
 }
