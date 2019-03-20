@@ -236,48 +236,55 @@ export function mpm(packs: Array<pack>, compile_from: string, compile_to: string
                     old:  boolean = undefined (don't mess with)
                 }
                 */
-                let queuedCustomModelDatas:Array<number> = [];
-                line = line.replace(RegExp(dollar_finder1 + 'id:"' + dollar_finder2 + output_model.pair + '")', 'g'), (match: string)=>{
-                    /*
-                    Start at match.length
-                    Find the closing-brace that ends the current scope
-                    Or find the next instance of `tag` that isn't in a quote or deeper scope
-                    Proceed with replacement
-                    Profit
-                    */
-
-                    let depth:number = 1;
-                    let insideDoubleQuotes:boolean = false;
-                    let insideSingleQuotes:boolean = false;
-                    for(let i=match.length+1; i<line.length; i++){
-                        let insideQuotes = insideDoubleQuotes || insideSingleQuotes;
-                        switch(line[i]){
-                            case '{': if(!insideQuotes) depth++; break;
-                            case '}': if(!insideQuotes) depth--; break;
-                            case '"': if(!insideSingleQuotes) insideDoubleQuotes = !insideDoubleQuotes; break;
-                            case "'": if(!insideDoubleQuotes) insideSingleQuotes = !insideSingleQuotes; break;
+                let queuedCustomMD:number = null;
+                let oldLine = "";
+                do {
+                    oldLine = line;
+                    line = line.replace(RegExp(dollar_finder1 + 'id:"' + dollar_finder2 + output_model.pair + '")'), (match: string, p1: string, undef, offset: number)=>{
+                        //For the linter
+                        p1 = p1;
+                        undef = undef;
+                        /*
+                        Start at match.length
+                        Find the closing-brace that ends the current scope
+                        Or find the next instance of `tag` that isn't in a quote or deeper scope
+                        Proceed with replacement
+                        Profit
+                        */
+                        let depth:number = 1;
+                        let insideDoubleQuotes:boolean = false;
+                        let insideSingleQuotes:boolean = false;
+                        for(let i=offset+match.length; i<line.length; i++){
+                            let insideQuotes = insideDoubleQuotes || insideSingleQuotes;
+                            switch(line[i]){
+                                case '{': if(!insideQuotes) depth++; break;
+                                case '}': if(!insideQuotes) depth--; break;
+                                case '"': if(!insideSingleQuotes) insideDoubleQuotes = !insideDoubleQuotes; break;
+                                case "'": if(!insideDoubleQuotes) insideSingleQuotes = !insideSingleQuotes; break;
+                            }
+                            if(!insideQuotes && ((line[i] + line[i+1] + line[i+2]) === "tag")) {
+                                queuedCustomMD = i+5;
+                                return match;
+                            }else if(depth===0) {
+                                return match[0] + 'id:"' + output_model.id + '",tag:{CustomModelData:' + output_model.cmd + '\}';
+                            }
                         }
-                        if(!insideQuotes && ((line[i] + line[i+1] + line[i+2]) === "tag")) {
-                            queuedCustomModelDatas.push(i+3);
+                    });
+                    if(queuedCustomMD) {
+                        console.log(queuedCustomMD);
+                        line = line.slice(0,queuedCustomMD) + 'CustomModelData:' + output_model.cmd + ',' + line.slice(queuedCustomMD);
+                        line = line.replace(RegExp(dollar_finder1 + 'id:"' + dollar_finder2 + output_model.pair + '")'), (match: string, p1: string, undef, offset: number)=>{
                             return match[0] + 'id:"' + output_model.id + '"';
-                        }else if(depth==0) {
-                            return match[0] + 'id:"' + output_model.id + '",tag:{CustomModelData:' + output_model.cmd + '\}';
-                        }
+                        });
                     }
-                    console.log(' * WARNING: NBT COULD NOT BE PARSED PROPERLY');
-                });//I'm working on it
-                for(let i=queuedCustomModelDatas.length-1; i>=0; i--){
-                    line = line.slice(0,queuedCustomModelDatas[i]) + 'CustomModelData:' + output_model.cmd + ',' + line.slice(queuedCustomModelDatas[i]);
-                }
-
-
-
+                    queuedCustomMD = null;
+                } while (oldLine !== line);
                 line = line.replace(RegExp(dollar_finder1 + '^give @.+? ' + dollar_finder2 + output_model.pair + ')'), ()=>{
-                    return line.match(/^give @.+? /) + output_model.id + '{CustomModelData:' + output_model.cmd + '}';
+                    return line.match(/^give .+? /) + output_model.id + '{CustomModelData:' + output_model.cmd + '}';
                 });
-                line = line.replace(/\}\{/g,',');
-                console.log(' - ' + line);
+                line = line.replace(/^(give .+?)\}\{/g,'$1,');
             }
+            console.log(' - ' + line);
             lines[index] = line;
         }
         fs.createFileSync(mcfunction.replace(path.join(compile_to), path.join(compile_from, "datapacks")));
