@@ -283,6 +283,9 @@ export function mpm(packs: Array<pack>, compile_from: string, compile_to: string
                     return line.match(/^give .+? /) + output_model.id + '{CustomModelData:' + output_model.cmd + '}';
                 });
                 line = line.replace(/^(give .+?)\}\{/g,'$1,');
+
+                line = line.replace(RegExp(dollar_finder1 + dollar_finder2 + output_model.pair + '.cmd)'), ' ' + output_model.cmd.toString());
+                line = line.replace(RegExp(dollar_finder1 + dollar_finder2 + output_model.pair + '.id)'), ' ' + output_model.id)
             }
             console.log(' - ' + line);
             lines[index] = line;

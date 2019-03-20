@@ -6,3 +6,5 @@ setblock ~ ~ ~ minecraft:dropper{Items:[{Slot:0,id:"$magilore:magic_wand",Damage
 setblock ~ ~ ~ minecraft:dropper{Items:[{Slot:0,id:"$magilore:magic_wand",tag:{display:{Name:"{\"text\":\"Magic Wand\",\"color\":\"dark_purple\"}"},foo:bar}}]}
 setblock ~ ~ ~ minecraft:dropper{Items:[{Slot:0,id:"$magilore:magic_wand"}]}
 execute if entity @s[nbt={SelectedItem:{id:"$magilore:magic_wand"}}]
+
+# $magilore:fire_wand.cmd $mechanization:mystic_chestplate.id
