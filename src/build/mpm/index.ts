@@ -221,6 +221,8 @@ export function mpm(packs: Array<pack>, compile_from: string, compile_to: string
         let function_file: string = fs.readFileSync(mcfunction, {encoding: 'utf8'});
 
         let lines: Array<string> = readLines(function_file);
+        console.log("'" + mcfunction.replace(path.join(compile_to), path.join(compile_from, "datapacks")) + "':");
+
         for (let [index, line] of Object.entries(lines)) {
             for (let output_model of output_models) {
                 const dollar_finder1: string = '(?:^|[^\\\\])('
@@ -234,7 +236,7 @@ export function mpm(packs: Array<pack>, compile_from: string, compile_to: string
                     old:  boolean = undefined (don't mess with)
                 }
                 */
-               
+                let queuedCustomModelDatas:Array<number> = [];
                 line = line.replace(RegExp(dollar_finder1 + 'id:"' + dollar_finder2 + output_model.pair + '")', 'g'), (match: string)=>{
                     /*
                     Start at match.length
@@ -243,46 +245,41 @@ export function mpm(packs: Array<pack>, compile_from: string, compile_to: string
                     Proceed with replacement
                     Profit
                     */
-                   
-                    let depth:number = 0;
-                    let inString:boolean = false;
-                    let stringChar:string = null;
-                    for(let i=match.length; i<line.length; i++){
+
+                    let depth:number = 1;
+                    let insideDoubleQuotes:boolean = false;
+                    let insideSingleQuotes:boolean = false;
+                    for(let i=match.length+1; i<line.length; i++){
+                        let insideQuotes = insideDoubleQuotes || insideSingleQuotes;
                         switch(line[i]){
-                            case '{': if(!inString) depth++; break;
-                            case '}': if(!inString) depth--; break;
-                            case '"':
-                                if(stringChar !== "'") {
-                                    if(stringChar) stringChar = null;
-                                    else stringChar = '"';
-                                    inString = !inString;
-                                }
-                                break;
-                            case "'":
-                                if(stringChar !== '"') {
-                                    if(stringChar) stringChar = null;
-                                    else stringChar = "'";
-                                    inString = !inString;
-                                }
-                                break;
+                            case '{': if(!insideQuotes) depth++; break;
+                            case '}': if(!insideQuotes) depth--; break;
+                            case '"': if(!insideSingleQuotes) insideDoubleQuotes = !insideDoubleQuotes; break;
+                            case "'": if(!insideDoubleQuotes) insideSingleQuotes = !insideSingleQuotes; break;
                         }
-                        if(!inString && line[i] + line[i+1] + line[i+2] === "tag") {
-                            line = line.slice(0,i+4) + 'CustomModelData:' + output_model.cmd + ',' + line.slice(i+4);
+                        if(!insideQuotes && ((line[i] + line[i+1] + line[i+2]) === "tag")) {
+                            queuedCustomModelDatas.push(i+3);
                             return match[0] + 'id:"' + output_model.id + '"';
                         }else if(depth==0) {
                             return match[0] + 'id:"' + output_model.id + '",tag:{CustomModelData:' + output_model.cmd + '\}';
                         }
                     }
-                
-                }).replace(RegExp(dollar_finder1 + '^give @.+? ' + dollar_finder2 + output_model.pair + ')'), ()=>{
+                    console.log(' * WARNING: NBT COULD NOT BE PARSED PROPERLY');
+                });//I'm working on it
+                for(let i=queuedCustomModelDatas.length-1; i>=0; i--){
+                    line = line.slice(0,queuedCustomModelDatas[i]) + 'CustomModelData:' + output_model.cmd + ',' + line.slice(queuedCustomModelDatas[i]);
+                }
+
+
+
+                line = line.replace(RegExp(dollar_finder1 + '^give @.+? ' + dollar_finder2 + output_model.pair + ')'), ()=>{
                     return line.match(/^give @.+? /) + output_model.id + '{CustomModelData:' + output_model.cmd + '}';
-                }).replace(/\}\{/g,'');
-                console.log(line);//Ha, not my fault, thank GOD
-               
+                });
+                line = line.replace(/\}\{/g,',');
+                console.log(' - ' + line);
             }
             lines[index] = line;
         }
-        console.log(mcfunction.replace(path.join(compile_to), path.join(compile_from, "datapacks")));
         fs.createFileSync(mcfunction.replace(path.join(compile_to), path.join(compile_from, "datapacks")));
         fs.writeFileSync(mcfunction.replace(path.join(compile_to), path.join(compile_from, "datapacks")), lines.join('\n'));
     }
@@ -301,13 +298,14 @@ export function mpm(packs: Array<pack>, compile_from: string, compile_to: string
                 model: model.pair.split(":")[0] + ':' + model.file
             }
             output.overrides.push(output_override);
-            console.log(output_override);
         }
-        console.log(material.material)
+        console.log(`\n\n${material.material} at '` + path.join(compile_from, "resources", "assets", namespace, "models", "item", id + ".json") + `':`);
         console.log(output);
-        console.log(path.join(compile_from, "resources", "assets", namespace, "models", "item", id + ".json"));
-        //fs.createFileSync(path.join(compile_from, "resources", "assets", namespace, "models", "item", id + ".json"));
-        //fs.writeFileSync(path.join(compile_from, "resources", "assets", namespace, "models", "item", id + ".json"), JSON.stringify(output));
+        console.log();
+        for (let override of output.overrides) console.log(override);
+        console.log();
+        console.log('output: ' + JSON.stringify(output));
+        fs.writeFileSync(path.join(compile_from, "resources", "assets", namespace, "models", "item", id + ".json"), JSON.stringify(output));
     }
 
     if (manifest_path) { 
